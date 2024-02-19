@@ -4,9 +4,7 @@ go 1.18
 
 require (
 	github.com/ethereum/go-ethereum v1.10.26
-	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/go-memdb v1.3.4
-	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.8.2
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
 	google.golang.org/protobuf v1.30.0

@@ -63,7 +63,7 @@ proto-check-breaking:
 
 all: install
 
-build: go.sum
+build: 
 	$(MAKE) -C go-sgxvm build
 
 ###############################################################################

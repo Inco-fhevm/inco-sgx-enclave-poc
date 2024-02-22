@@ -1,8 +1,8 @@
 package librustgo
 
 import (
-	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
+	"github.com/Inco-fhevm/inco-sgx-enclave/internal/api"
+	"github.com/Inco-fhevm/inco-sgx-enclave/types"
 
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )

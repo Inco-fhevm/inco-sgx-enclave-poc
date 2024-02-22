@@ -1,4 +1,4 @@
-module github.com/SigmaGmbH/librustgo
+module github.com/Inco-fhevm/inco-sgx-enclave
 
 go 1.18
 

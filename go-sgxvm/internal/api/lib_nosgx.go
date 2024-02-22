@@ -9,7 +9,8 @@ import "C"
 
 import (
 	"net"
-	"github.com/SigmaGmbH/librustgo/types"
+
+	"github.com/Inco-fhevm/inco-sgx-enclave/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 

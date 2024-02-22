@@ -6,7 +6,7 @@ DEFAULT = help
 CC=clang
 CXX=clang++
 SGX_MODE ?= HW
-ENCLAVE_HOME ?= $(HOME)/.inco-enclave
+ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
 Trts_Library_Name = sgx_trts
 Service_Library_Name = sgx_tservice

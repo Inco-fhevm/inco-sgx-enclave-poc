@@ -6,7 +6,7 @@ DEFAULT = help
 CC=clang
 CXX=clang++
 SGX_MODE ?= HW
-ENCLAVE_HOME ?= $(HOME)/.inco-enclave
+ENCLAVE_HOME ?= $(HOME)/.swisstronik-enclave
 
 build:
 	@ENCLAVE_HOME=$(ENCLAVE_HOME) SGX_MODE=$(SGX_MODE) make build -C ../sgxvm/
@@ -16,4 +16,4 @@ build:
 	@cp $(CURDIR)/target/release/libsgxvm_wrapper.so $(CURDIR)/internal/api/libsgx_wrapper.x86_64.so
 	@protoc --go_out=types --proto_path=../sgxvm/proto/ ../sgxvm/proto/ffi.proto
 	@protoc --go_out=types --proto_path=proto/ proto/node.proto
-	@cp types/github.com/SigmaGmbH/librustgo/types/* types/ && rm -rf types/github.com
+	@cp types/github.com/Inco-fhevm/inco-sgx-enclave/types/* types/ && rm -rf types/github.com

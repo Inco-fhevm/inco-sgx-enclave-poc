@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/hex"
 	"errors"
-	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
+
+	"github.com/Inco-fhevm/inco-sgx-enclave/internal/api"
+	"github.com/Inco-fhevm/inco-sgx-enclave/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
@@ -53,6 +54,7 @@ func DeployCounterContract(from common.Address, db *types.MockedDB) (common.Addr
 		value,
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
 	)
@@ -85,6 +87,7 @@ func CallAddMethod(from common.Address, contractAddress common.Address, db *type
 		value,
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		true,
 	)
@@ -122,6 +125,7 @@ func QueryCounterValue(from common.Address, contractAddress common.Address, db *
 		value,
 		nil,
 		gasLimit,
+		0,
 		txContext,
 		false, // commit = false, because we're doing a query to contract
 	)

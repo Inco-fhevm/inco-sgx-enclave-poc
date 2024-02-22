@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"runtime/debug"
 
-	types "github.com/SigmaGmbH/librustgo/types"
+	types "github.com/Inco-fhevm/inco-sgx-enclave/types"
 
 	// "github.com/holiman/uint256"
 	"unsafe"
@@ -90,7 +90,7 @@ func BuildConnector(q types.Connector) C.GoQuerier {
 
 func buildEmptyConnector() C.GoQuerier {
 	return C.GoQuerier{
-		state: nil,
+		state:  nil,
 		vtable: querier_vtable,
 	}
 }

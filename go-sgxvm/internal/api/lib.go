@@ -9,14 +9,15 @@ import "C"
 
 import (
 	"fmt"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"golang.org/x/net/netutil"
-	"google.golang.org/protobuf/proto"
 	"log"
 	"net"
 	"runtime"
 
-	"github.com/SigmaGmbH/librustgo/types"
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"golang.org/x/net/netutil"
+	"google.golang.org/protobuf/proto"
+
+	"github.com/Inco-fhevm/inco-sgx-enclave/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 
@@ -107,7 +108,7 @@ func IsNodeInitialized() (bool, error) {
 func InitializeMasterKey(shouldReset bool) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_InitializeMasterKey{
-		InitializeMasterKey: &types.InitializeMasterKeyRequest{ ShouldReset: shouldReset },
+		InitializeMasterKey: &types.InitializeMasterKeyRequest{ShouldReset: shouldReset},
 	}}
 	reqBytes, err := proto.Marshal(&req)
 	if err != nil {
@@ -230,7 +231,7 @@ func RequestSeed(hostname string, port int) error {
 	// Create protobuf encoded request
 	req := types.SetupRequest{Req: &types.SetupRequest_NodeSeed{
 		NodeSeed: &types.NodeSeedRequest{
-			Fd: int32(file.Fd()),
+			Fd:       int32(file.Fd()),
 			Hostname: hostname,
 		},
 	}}
@@ -261,7 +262,7 @@ func GetNodePublicKey() (*types.NodePublicKeyResponse, error) {
 	c := buildEmptyConnector()
 
 	// Create protobuf-encoded request
-	req := &types.FFIRequest{ Req: &types.FFIRequest_PublicKeyRequest {} }
+	req := &types.FFIRequest{Req: &types.FFIRequest_PublicKeyRequest{}}
 	reqBytes, err := proto.Marshal(req)
 	if err != nil {
 		log.Fatalln("Failed to encode req:", err)
@@ -310,7 +311,7 @@ func Call(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce:		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request
@@ -367,7 +368,7 @@ func Create(
 		Value:      value,
 		AccessList: convertAccessList(accessList),
 		Commit:     commit,
-		Nonce: 		nonce,
+		Nonce:      nonce,
 	}
 
 	// Create protobuf encoded request

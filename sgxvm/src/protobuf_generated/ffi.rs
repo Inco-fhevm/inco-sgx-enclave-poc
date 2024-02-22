@@ -9458,7 +9458,7 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     estH\0R\x0bcallRequest\x12C\n\rcreateRequest\x18\x02\x20\x01(\x0b2\x1b.f\
     fi.ffi.SGXVMCreateRequestH\0R\rcreateRequest\x12K\n\x10publicKeyRequest\
     \x18\x03\x20\x01(\x0b2\x1d.ffi.ffi.NodePublicKeyRequestH\0R\x10publicKey\
-    RequestB\x05\n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xa0:\n\
+    RequestB\x05\n\x03reqB&Z$github.com/Inco-fhevm/inco-sgx-enclave/typesJ\xa0:\n\
     \x07\x12\x05\0\0\xd8\x01\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\
     \x02\x12\x03\x02\0\x10\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\
     \x12\x03\x04\0;\n\x1d\n\x02\x04\0\x12\x04\x08\0\x0b\x012\x11\x20General\

@@ -2009,7 +2009,7 @@ static file_descriptor_proto_data: &'static [u8] = b"\
     equestH\0R\x08nodeSeed\x12G\n\risInitialized\x18\x04\x20\x01(\x0b2\x1f.n\
     ode.node.IsInitializedRequestH\0R\risInitialized\x12>\n\nnodeStatus\x18\
     \x05\x20\x01(\x0b2\x1c.node.node.NodeStatusRequestH\0R\nnodeStatusB\x05\
-    \n\x03reqB&Z$github.com/SigmaGmbH/librustgo/typesJ\xf2\x06\n\x06\x12\x04\
+    \n\x03reqB&Z$github.com/Inco-fhevm/inco-sgx-enclave/typesJ\xf2\x06\n\x06\x12\x04\
     \0\0#\x01\n\x08\n\x01\x0c\x12\x03\0\0\x12\n\x08\n\x01\x02\x12\x03\x02\0\
     \x12\n\x08\n\x01\x08\x12\x03\x04\0;\n\t\n\x02\x08\x0b\x12\x03\x04\0;\n\t\
     \n\x02\x04\0\x12\x03\x06\0<\n\n\n\x03\x04\0\x01\x12\x03\x06\x08\"\n\x0b\

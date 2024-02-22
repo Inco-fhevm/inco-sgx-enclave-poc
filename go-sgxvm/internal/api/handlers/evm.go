@@ -2,13 +2,14 @@ package handlers
 
 import "C"
 import (
-	"github.com/SigmaGmbH/librustgo/internal/api"
-	"github.com/SigmaGmbH/librustgo/types"
+	"log"
+	"runtime"
+
+	"github.com/Inco-fhevm/inco-sgx-enclave/internal/api"
+	"github.com/Inco-fhevm/inco-sgx-enclave/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/protobuf/proto"
-	"log"
-	"runtime"
 )
 
 // Call handles incoming call to contract or transfer of value

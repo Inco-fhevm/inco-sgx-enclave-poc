@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package node.node;
 
-option go_package = "github.com/SigmaGmbH/librustgo/types";
+option go_package = "github.com/Inco-fhevm/inco-sgx-enclave/types";
 
 message InitializeMasterKeyRequest { bool shouldReset = 1; }
 

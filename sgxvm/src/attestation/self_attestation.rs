@@ -68,6 +68,6 @@ pub fn self_attest() -> sgx_status_t {
 
 #[cfg(not(feature = "hardware_mode"))]
 pub fn self_attest() -> sgx_status_t {
-    println!("[Enclave] You're using incod built in SOFTWARE mode. It cannot be used to connect to actual testnet / mainnet");    
+    println!("[Enclave] You're using swisstronikd built in SOFTWARE mode. It cannot be used to connect to actual testnet / mainnet");    
     sgx_status_t::SGX_SUCCESS
 }

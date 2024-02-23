@@ -63,6 +63,10 @@ proto-check-breaking:
 
 all: install
 
+
+init:
+	@git submodule update --init --recursive
+
 build: 
 	$(MAKE) -C go-sgxvm build
 

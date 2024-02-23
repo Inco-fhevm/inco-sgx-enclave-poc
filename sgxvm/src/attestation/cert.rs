@@ -39,8 +39,8 @@ pub enum Error {
 
 pub const IAS_REPORT_CA: &[u8] = include_bytes!("../../AttestationReportSigningCACert.pem");
 
-const ISSUER: &str = "Inco";
-const SUBJECT: &str = "Inco";
+const ISSUER: &str = "Swisstronik";
+const SUBJECT: &str = "Swisstronik";
 
 pub fn get_mr_enclave() -> [u8; 32] {
     rsgx_self_report().body.mr_enclave.m

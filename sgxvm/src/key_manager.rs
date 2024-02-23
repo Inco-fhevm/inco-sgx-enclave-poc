@@ -485,12 +485,12 @@ impl RegistrationKey {
     }
 }
 
-/// Tries to return path to $HOME/.inco-enclave directory.
+/// Tries to return path to $HOME/.swisstronik-enclave directory.
 /// If it cannot find home directory, panics with error
 fn get_default_seed_home() -> OsString {
     let home_dir = env::home_dir().expect("[Enclave] Cannot find home directory");
     let default_seed_home = home_dir
         .to_str()
         .expect("[Enclave] Cannot decode home directory path");
-    OsString::from(format!("{}/.inco-enclave", default_seed_home))
+    OsString::from(format!("{}/.swisstronik-enclave", default_seed_home))
 }

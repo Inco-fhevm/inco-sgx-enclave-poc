@@ -32,12 +32,14 @@ pub const SGX_FLAGS_MODE64BIT: uint64_t = 0x0000_0000_0000_0004; //If set, then 
 pub const SGX_FLAGS_PROVISION_KEY: uint64_t = 0x0000_0000_0000_0010; //If set, then the enclave has access to provision key
 pub const SGX_FLAGS_EINITTOKEN_KEY: uint64_t = 0x0000_0000_0000_0020; //If set, then the enclave has access to EINITTOKEN key
 pub const SGX_FLAGS_KSS: uint64_t = 0x0000_0000_0000_0080; //If set enclave uses KSS
+pub const SGX_FLAGS_AEX_NOTIFY: uint64_t = 0x0000_0000_0000_0400; //If set, then the enclave enables AEX Notify
 pub const SGX_FLAGS_RESERVED: uint64_t = !(SGX_FLAGS_INITTED
     | SGX_FLAGS_DEBUG
     | SGX_FLAGS_MODE64BIT
     | SGX_FLAGS_PROVISION_KEY
     | SGX_FLAGS_EINITTOKEN_KEY
     | SGX_FLAGS_KSS);
+pub const SGX_FLAGS_NON_CHECK_BITS: uint64_t = 0x00FF_0000_0000_0000; //BIT[55-48] will not be checked
 
 // XSAVE Feature Request Mask
 pub const SGX_XFRM_LEGACY: uint64_t = 0x0000_0000_0000_0003; //Legacy XFRM
@@ -45,9 +47,10 @@ pub const SGX_XFRM_AVX: uint64_t = 0x0000_0000_0000_0006; // AVX
 pub const SGX_XFRM_AVX512: uint64_t = 0x0000_0000_0000_00E6; // AVX-512 - not supported
 pub const SGX_XFRM_MPX: uint64_t = 0x0000_0000_0000_0018; // MPX - not supported
 pub const SGX_XFRM_PKRU: uint64_t = 0x0000_0000_0000_0200; // PKRU state
+pub const SGX_XFRM_AMX: uint64_t = 0x0000_0000_0006_0000; // AMX XFRM, including XTILEDATA(0x40000) and XTILECFG(0x20000)
 
 pub const SGX_XFRM_RESERVED: uint64_t =
-    !(SGX_XFRM_LEGACY | SGX_XFRM_AVX | SGX_XFRM_AVX512 | SGX_XFRM_PKRU);
+    !(SGX_XFRM_LEGACY | SGX_XFRM_AVX | SGX_XFRM_AVX512 | SGX_XFRM_PKRU | SGX_XFRM_AMX);
 
 impl_struct! {
     pub struct sgx_attributes_t {
@@ -945,6 +948,21 @@ pub const SGX_THREAD_COND_INITIALIZER: sgx_thread_cond_t = sgx_thread_cond_t {
     },
 };
 
+/* intel sgx sdk 2.18 */
+#[repr(C)]
+pub struct sgx_thread_spinlock_t {
+    pub m_refcount: size_t,
+    pub m_lock: uint32_t,
+    pub m_owner: sgx_thread_t,
+}
+
+pub const SGX_THREAD_RECURSIVE_SPINLOCK_INITIALIZER: sgx_thread_spinlock_t =
+    sgx_thread_spinlock_t {
+        m_refcount: 0,
+        m_lock: 0,
+        m_owner: SGX_THREAD_T_NULL,
+    };
+
 //
 // sgx_tkey_exchange.h
 //
@@ -1033,14 +1051,62 @@ cfg_if! {
 }
 
 impl_struct! {
-    pub struct sgx_exception_info_t {
-        pub cpu_context: sgx_cpu_context_t,
-        pub exception_vector: sgx_exception_vector_t,
-        pub exception_type: sgx_exception_type_t,
+    pub struct sgx_misc_exinfo_t {
+        pub faulting_address: uint64_t,
+        pub error_code: uint32_t,
+        pub reserved: uint32_t,
     }
 }
 
+cfg_if! {
+    if #[cfg(target_arch = "x86")] {
+        #[repr(C, align(64))]
+        pub struct sgx_exception_info_t {
+            pub cpu_context: sgx_cpu_context_t,
+            pub exception_vector: sgx_exception_vector_t,
+            pub exception_type: sgx_exception_type_t,
+            pub exinfo: sgx_misc_exinfo_t,
+            pub exception_valid: uint32_t,
+            pub do_aex_mitigation: uint32_t,
+            pub xsave_size: uint64_t,
+            pub reserved: [uint64_t; 6],
+            pub xsave_area: [uint8_t; 0],
+        }
+    } else {
+        #[repr(C, align(64))]
+        pub struct sgx_exception_info_t {
+            pub cpu_context: sgx_cpu_context_t,
+            pub exception_vector: sgx_exception_vector_t,
+            pub exception_type: sgx_exception_type_t,
+            pub exinfo: sgx_misc_exinfo_t,
+            pub exception_valid: uint32_t,
+            pub do_aex_mitigation: uint32_t,
+            pub xsave_size: uint64_t,
+            pub reserved: [uint64_t; 1],
+            pub xsave_area: [uint8_t; 0],
+        }
+    }
+}
+
+impl_struct_ContiguousMemory! {
+    sgx_exception_info_t;
+}
+
 pub type sgx_exception_handler_t = extern "C" fn(info: *mut sgx_exception_info_t) -> int32_t;
+
+/* intel sgx sdk 2.20 */
+//
+// sgx_trts_aex.h
+//
+#[repr(C)]
+pub struct sgx_aex_mitigation_node_t {
+    pub handler: sgx_aex_mitigation_fn_t,
+    pub args: *const c_void,
+    pub next: *mut sgx_aex_mitigation_node_t,
+}
+
+pub type sgx_aex_mitigation_fn_t =
+    extern "C" fn(info: *mut sgx_exception_info_t, args: *const c_void) -> c_void;
 
 //
 // sgx_tseal.h
@@ -1246,19 +1312,20 @@ pub const SL_DEFAULT_SLEEP_RETRIES: uint32_t = 20000;
 pub const SL_DEFUALT_MAX_TASKS_QWORDS: uint32_t = 1;
 pub const SL_MAX_TASKS_MAX_QWORDS: uint32_t = 8;
 
-pub const _SGX_USWITCHLESS_WORKER_EVENT_NUM: size_t = 4;
+pub const SGX_USWITCHLESS_WORKER_EVENT_NUM: size_t = 4;
 
 #[repr(C)]
 pub struct sgx_uswitchless_config_t {
-    pub switchless_calls_pool_size_qwords: uint32_t,
-    pub num_uworkers: uint32_t,
-    pub num_tworkers: uint32_t,
-    pub retries_before_fallback: uint32_t,
-    pub retries_before_sleep: uint32_t,
-    pub callback_func: [sgx_uswitchless_worker_callback_t; _SGX_USWITCHLESS_WORKER_EVENT_NUM],
+    pub switchless_calls_pool_size_qwords: uint64_t,
+    pub num_uworkers: uint64_t,
+    pub num_tworkers: uint64_t,
+    pub retries_before_fallback: uint64_t,
+    pub retries_before_sleep: uint64_t,
+    pub callback_func: [sgx_uswitchless_worker_callback_t; SGX_USWITCHLESS_WORKER_EVENT_NUM],
 }
 
 impl Default for sgx_uswitchless_config_t {
+    #[allow(invalid_value)]
     fn default() -> sgx_uswitchless_config_t {
         let mut config: sgx_uswitchless_config_t = unsafe { core::mem::zeroed() };
         config.num_uworkers = 1;
@@ -1371,7 +1438,10 @@ pub struct sgx_ql_qve_collateral_t {
     pub qe_identity_size: uint32_t,
 }
 
+/* intel DCAP 1.17 */
+// Deprecate structure name tdx_ql_qve_collateral_t
 pub type tdx_ql_qve_collateral_t = sgx_ql_qve_collateral_t;
+pub type tdx_ql_qv_collateral_t = sgx_ql_qve_collateral_t;
 
 impl_enum! {
     #[repr(u8)]
@@ -1379,6 +1449,17 @@ impl_enum! {
     pub enum sgx_prod_type_t {
         SGX_PROD_TYPE_SGX   = 0,
         SGX_PROD_TYPE_TDX   = 1,
+    }
+}
+
+/* intel DCAP 1.17 */
+impl_enum! {
+    #[repr(u32)]
+    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+    pub enum sgx_qpl_cache_type_t {
+        SGX_QPL_CACHE_CERTIFICATE   = 1,
+        SGX_QPL_CACHE_QV_COLLATERAL = 2,
+        SGX_QPL_CACHE_MULTICERTS    = 4,
     }
 }
 
@@ -1636,11 +1717,12 @@ impl_enum! {
 }
 
 //
-// qve_header.h
+// sgx_qve_header.h
 //
 
 pub const ROOT_KEY_ID_SIZE: usize = 48;
 pub const PLATFORM_INSTANCE_ID_SIZE: usize = 16;
+pub const MAX_SA_LIST_SIZE: usize = 160;
 
 /* intel DCAP 1.7 */
 impl_enum! {
@@ -1677,15 +1759,25 @@ impl_copy_clone! {
         pub dynamic_platform: pck_cert_flag_enum_t,
         pub cached_keys: pck_cert_flag_enum_t,
         pub smt_enabled: pck_cert_flag_enum_t,
+        /* intel DCAP 1.15 */
+        pub sa_list: [c_char; MAX_SA_LIST_SIZE],
     }
 }
 
 impl_struct_default! {
-    sgx_ql_qv_supplemental_t; //176
+    sgx_ql_qv_supplemental_t; //336
 }
 
 impl_struct_ContiguousMemory! {
     sgx_ql_qv_supplemental_t;
+}
+
+/* intel DCAP 1.15 */
+#[repr(C)]
+pub struct tee_supp_data_descriptor_t {
+    pub major_version: uint16_t,
+    pub data_size: uint32_t,
+    pub p_data: *mut uint8_t,
 }
 
 /* intel DCAP 1.6 */
@@ -1712,6 +1804,59 @@ impl_enum! {
         SGX_QE_TYPE_ECDSA   = 0,
         SGX_QE_TYPE_TD      = 1,
     }
+}
+
+/* intel DCAP 1.15 */
+//
+// tdx_attes.h
+//
+pub const TDX_UUID_SIZE: usize = 16;
+pub const TDX_REPORT_DATA_SIZE: usize = 64;
+pub const TDX_REPORT_SIZE: usize = 1024;
+
+impl_struct! {
+    pub struct tdx_uuid_t {
+        pub d: [uint8_t; TDX_UUID_SIZE],
+    }
+}
+
+impl_copy_clone! {
+    pub struct tdx_report_data_t {
+        pub d: [uint8_t; TDX_REPORT_DATA_SIZE],
+    }
+
+    pub struct tdx_report_t {
+        pub d: [uint8_t; TDX_REPORT_SIZE],
+    }
+}
+
+impl_struct_default! {
+    tdx_report_data_t; //64
+    tdx_report_t; //1024
+}
+
+impl_struct_ContiguousMemory! {
+    tdx_report_data_t;
+    tdx_report_t;
+}
+
+impl_packed_copy_clone! {
+    pub struct tdx_rtmr_event_t {
+        pub version: uint32_t,
+        pub rtmr_index: uint64_t,
+        pub extend_data: [uint8_t; 48],
+        pub event_type: uint32_t,
+        pub event_data_size: uint32_t,
+        pub event_data: [uint8_t; 0],
+    }
+}
+
+impl_struct_default! {
+    tdx_rtmr_event_t; //68
+}
+
+impl_struct_ContiguousMemory! {
+    tdx_rtmr_event_t;
 }
 
 /* intel sgx sdk 2.7.1 */
@@ -1899,7 +2044,6 @@ unsafe impl ContiguousMemory for sgx_align_ec256_dh_shared_t {}
 unsafe impl ContiguousMemory for sgx_align_ec256_private_t {}
 
 /* intel sgx sdk 2.8 */
-
 //
 // sgx_rsrv_mem_mngr.h
 //
@@ -1907,3 +2051,82 @@ pub const SGX_PROT_READ: uint32_t = 0x1; /* page can be read */
 pub const SGX_PROT_WRITE: uint32_t = 0x2; /* page can be written */
 pub const SGX_PROT_EXEC: uint32_t = 0x4; /* page can be executed */
 pub const SGX_PROT_NONE: uint32_t = 0x0; /* page can not be accessed */
+
+/* intel sgx sdk 2.18 */
+//
+// sgx_mm_rt_abstraction.h
+//
+#[repr(C)]
+pub struct sgx_mm_mutex {
+    pub m: sgx_thread_spinlock_t,
+}
+
+pub type sgx_mm_pfhandler_t = extern "C" fn(pfinfo: *const sgx_pfinfo) -> int32_t;
+
+//
+// sgx_mm.h
+//
+impl_struct! {
+    pub struct sgx_pfinfo {
+        pub maddr: uint64_t,
+        pub pfec: uint32_t,
+        pub reserved: uint32_t,
+    }
+}
+
+pub type sgx_enclave_fault_handler_t =
+    extern "C" fn(pfinfo: *const sgx_pfinfo, private_data: *mut c_void) -> int32_t;
+
+// bit 0 - 7 are allocation flags.
+pub const SGX_EMA_ALLOC_FLAGS_SHIFT: uint32_t = 0;
+pub const SGX_EMA_ALLOC_FLAGS_MASK: uint32_t = 0xFF << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Only reserve an address range, no physical memory committed.
+pub const SGX_EMA_RESERVE: uint32_t = 0x01 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Reserve an address range and commit physical memory.
+pub const SGX_EMA_COMMIT_NOW: uint32_t = 0x02 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Reserve an address range and commit physical memory on demand.
+pub const SGX_EMA_COMMIT_ON_DEMAND: uint32_t = 0x04 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Always commit pages from higher to lower addresses,
+// no gaps in addresses above the last committed.
+pub const SGX_EMA_GROWSDOWN: uint32_t = 0x10 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Always commit pages from lower to higher addresses,
+// no gaps in addresses below the last committed.
+pub const SGX_EMA_GROWSUP: uint32_t = 0x20 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+// Map addr must be exactly as requested.
+pub const SGX_EMA_FIXED: uint32_t = 0x40 << SGX_EMA_ALLOC_FLAGS_SHIFT;
+
+// bit 8 - 15 are page types.
+pub const SGX_EMA_PAGE_TYPE_SHIFT: uint32_t = 8;
+pub const SGX_EMA_PAGE_TYPE_MASK: uint32_t = 0xFF << SGX_EMA_PAGE_TYPE_SHIFT;
+// TCS page type.
+pub const SGX_EMA_PAGE_TYPE_TCS: uint32_t = 0x01 << SGX_EMA_PAGE_TYPE_SHIFT;
+// regular page type, default if not specified.
+pub const SGX_EMA_PAGE_TYPE_REG: uint32_t = 0x02 << SGX_EMA_PAGE_TYPE_SHIFT;
+// TRIM page type.
+pub const SGX_EMA_PAGE_TYPE_TRIM: uint32_t = 0x04 << SGX_EMA_PAGE_TYPE_SHIFT;
+// the first page in shadow stack.
+pub const SGX_EMA_PAGE_TYPE_SS_FIRST: uint32_t = 0x05 << SGX_EMA_PAGE_TYPE_SHIFT;
+// the rest pages in shadow stack.
+pub const SGX_EMA_PAGE_TYPE_SS_REST: uint32_t = 0x06 << SGX_EMA_PAGE_TYPE_SHIFT;
+
+// Use bit 24-31 for alignment masks.
+pub const SGX_EMA_ALIGNMENT_SHIFT: uint32_t = 24;
+pub const SGX_EMA_ALIGNMENT_MASK: uint32_t = 0xFF << SGX_EMA_ALIGNMENT_SHIFT;
+pub const SGX_EMA_ALIGNMENT_64KB: uint32_t = 16 << SGX_EMA_ALIGNMENT_SHIFT;
+pub const SGX_EMA_ALIGNMENT_16MB: uint32_t = 24 << SGX_EMA_ALIGNMENT_SHIFT;
+pub const SGX_EMA_ALIGNMENT_4GB: uint32_t = 32 << SGX_EMA_ALIGNMENT_SHIFT;
+
+pub const SGX_EMA_PROT_NONE: uint32_t = 0x0;
+pub const SGX_EMA_PROT_READ: uint32_t = 0x1;
+pub const SGX_EMA_PROT_WRITE: uint32_t = 0x2;
+pub const SGX_EMA_PROT_EXEC: uint32_t = 0x4;
+pub const SGX_EMA_PROT_READ_WRITE: uint32_t = SGX_EMA_PROT_READ | SGX_EMA_PROT_WRITE;
+pub const SGX_EMA_PROT_READ_EXEC: uint32_t = SGX_EMA_PROT_READ | SGX_EMA_PROT_EXEC;
+pub const SGX_EMA_PROT_MASK: uint32_t = SGX_EMA_PROT_READ_WRITE | SGX_EMA_PROT_EXEC;
+
+// Return value used by the EMM #PF handler to indicate
+// to the dispatcher that it should continue searching for the next handler.
+pub const SGX_MM_EXCEPTION_CONTINUE_SEARCH: int32_t = 0;
+// Return value used by the EMM #PF handler to indicate
+// to the dispatcher that it should stop searching and continue execution.
+pub const SGX_MM_EXCEPTION_CONTINUE_EXECUTION: int32_t = -1;

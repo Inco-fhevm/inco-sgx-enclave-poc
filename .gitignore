@@ -4,6 +4,6 @@ release/
 .idea/
 .vscode/
 .DS_Store
-*swtr_seed
+*inco_seed
 build/
 .testnets/

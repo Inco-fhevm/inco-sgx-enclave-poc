@@ -17,7 +17,7 @@ use crate::error::Error;
 
 pub const REGISTRATION_KEY_SIZE: usize = 32;
 pub const SEED_SIZE: usize = 32;
-pub const SEED_FILENAME: &str = ".swtr_seed";
+pub const SEED_FILENAME: &str = ".inco_seed";
 pub const PUBLIC_KEY_SIZE: usize = 32;
 pub const PRIVATE_KEY_SIZE: usize = 32;
 

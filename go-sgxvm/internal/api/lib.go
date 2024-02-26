@@ -17,7 +17,7 @@ import (
 	"golang.org/x/net/netutil"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/Inco-fhevm/inco-sgx-enclave/types"
+	"github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/types"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 )
 

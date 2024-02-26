@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"runtime/debug"
 
-	types "github.com/Inco-fhevm/inco-sgx-enclave/types"
+	types "github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/types"
 
 	// "github.com/holiman/uint256"
 	"unsafe"

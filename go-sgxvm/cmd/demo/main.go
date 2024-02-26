@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"errors"
 
-	"github.com/Inco-fhevm/inco-sgx-enclave/internal/api"
-	"github.com/Inco-fhevm/inco-sgx-enclave/types"
+	"github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/internal/api"
+	"github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )

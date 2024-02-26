@@ -5,8 +5,8 @@ import (
 	"log"
 	"runtime"
 
-	"github.com/Inco-fhevm/inco-sgx-enclave/internal/api"
-	"github.com/Inco-fhevm/inco-sgx-enclave/types"
+	"github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/internal/api"
+	"github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm/types"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
 	"google.golang.org/protobuf/proto"

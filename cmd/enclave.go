@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	librustgo "github.com/Inco-fhevm/inco-sgx-enclave"
+	librustgo "github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/server"
 	"github.com/spf13/cobra"

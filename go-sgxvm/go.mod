@@ -1,4 +1,4 @@
-module github.com/Inco-fhevm/inco-sgx-enclave
+module github.com/Inco-fhevm/inco-sgx-enclave/go-sgxvm
 
 go 1.18
 

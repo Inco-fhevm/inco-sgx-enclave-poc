@@ -16,7 +16,6 @@ Also, if you want to put enclave file (`enclave.signed.so`) to other directory, 
 ```sh
 ENCLAVE_HOME=/tmp/enclave-directory make build
 ```
-
 ### Build `incodcli`
 
 If your OS / hardware doesn't support SGX even in simulation mode, you can build CLI which will allow you:
@@ -34,3 +33,7 @@ Below you can see table with build commands for each OS / CPU
 | macos with M1 chip    | `make build-macos-cli-arm`  |
 | macos with Intel chip | `make build-macos-cli-amd`  |
 | windows               | `make build-windows-cli`    |
+
+### License Terms
+This software is based in full or partially on  https://github.com/SigmaGmbH/swisstronik-chain.
+Please see https://github.com/SigmaGmbH/swisstronik-chain/blob/master/LICENSE for details
